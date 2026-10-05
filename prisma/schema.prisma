@@ -1,0 +1,318 @@
+// Rifa's Collections - Database schema
+// Money is stored in minor units (pesewas/cents) as Int to avoid float rounding errors.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  // Everything ADMIN can do, plus managing staff: granting and revoking admin
+  // access. Only a SUPER_ADMIN can reach /admin/staff.
+  SUPER_ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  PAYSTACK // handles MTN MoMo, Telecel Cash, AirtelTigo Money, and cards
+}
+
+model User {
+  id                String   @id @default(cuid())
+  name              String?
+  email             String   @unique
+  passwordHash      String
+  role              Role     @default(CUSTOMER)
+  twoFactorSecret   String?  // only ever read/written server-side, never sent to the client
+  twoFactorEnabled  Boolean  @default(false)
+  /// Every login token carries the value this had when it was issued. Bumping
+  /// it invalidates every existing session for this user at once — on a role
+  /// change, a password change, or "sign out of all devices". Without it a
+  /// JWT stays valid for its full 30 days no matter what changes here.
+  sessionVersion    Int      @default(0)
+  /// Profile photo, uploaded by the user. Optional.
+  avatarUrl         String?
+  /// VIP is a paid membership that runs until this moment. Active while it is
+  /// in the future; lapses on its own when it passes, with nothing to cancel.
+  /// Each paid period extends it from whichever is later: now, or the current
+  /// end — so renewing early never loses days.
+  vipUntil          DateTime?
+  /// Start of the current unbroken membership. Reset when a lapsed member
+  /// rejoins, so it always means "member continuously since".
+  vipSince          DateTime?
+  /// The vipUntil value a "running out" reminder was last sent for. Buying
+  /// more time changes vipUntil, which re-arms the reminder for the new end.
+  vipReminderFor    DateTime?
+  /// Whether the member wants an email when an early-access window opens.
+  vipDropEmails     Boolean   @default(true)
+  /// The latest earlyAccessAt this member has been emailed about. Windows that
+  /// open after it are news; windows at or before it have been announced.
+  vipDropNoticedTo  DateTime?
+  vipPurchases      VipPurchase[]
+  orders            Order[]
+  addresses         Address[]
+  auditLogs         AdminAuditLog[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Every admin action gets a row here: who did what, to what, and when.
+// Never deleted, only ever appended to.
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String   // e.g. "product.create", "product.restock", "product.update"
+  targetType String   // e.g. "Product", "ProductVariant"
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+model Address {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName    String
+  phone       String
+  line1       String
+  line2       String?
+  city        String
+  region      String
+  country     String  @default("GH")
+  isDefault   Boolean @default(false)
+  orders      Order[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id            String           @id @default(cuid())
+  name          String
+  slug          String           @unique
+  description   String
+  material      String
+  price         Int              // minor units
+  currency      String           @default("GHS")
+  categoryId    String
+  category      Category         @relation(fields: [categoryId], references: [id])
+  frontImageUrl String
+  backImageUrl  String
+  // Optional short, muted, looping clip shown on card hover and as a gallery
+  // slot on the detail page. Nullable so every existing product stays valid.
+  hoverVideoUrl String?
+  // Extra detail shots beyond front/back — fabric close-ups, styling, scale.
+  // Defaults to empty so existing rows need no backfill.
+  galleryImages String[]         @default([])
+  isPublished   Boolean          @default(true)
+  /// When the product opens to everyone. Null means it is already open.
+  releaseAt     DateTime?
+  /// When VIP members can see and buy it, ahead of `releaseAt`. Null means no
+  /// early window: VIPs get it when everyone does.
+  earlyAccessAt DateTime?
+  variants      ProductVariant[]
+  // On-model photographs, uploaded by an admin. Absent means this product has
+  // no model view, which is the admin's per-product choice.
+  modelShots    ProductModelShot[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([releaseAt])
+}
+
+/// One paid VIP period. Created PENDING when checkout starts; flipped to PAID
+/// exactly once, after Paystack confirms the payment server-to-server, at which
+/// point the user's `vipUntil` is extended by `periodDays`.
+model VipPurchase {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  /// "MONTH" or "YEAR" — see src/lib/vip.ts.
+  plan        String
+  /// Minor units, snapshotted at checkout. What Paystack confirms must equal
+  /// this, or the purchase is refused — same rule as orders.
+  amount      Int
+  currency    String   @default("GHS")
+  periodDays  Int
+  status      String   @default("PENDING")
+  paymentRef  String?  @unique
+  /// The membership window this payment bought, recorded when it is applied.
+  periodStart DateTime?
+  periodEnd   DateTime?
+  createdAt   DateTime @default(now())
+  paidAt      DateTime?
+
+  @@index([userId, createdAt])
+}
+
+/// Storefront settings an admin changes without a deploy — at the moment, the
+/// homepage hero image.
+///
+/// Key/value rather than a column per setting, so the next one (a hero link, a
+/// seasonal message) is a new row and not a migration. Keys are validated
+/// against a fixed list in the API, so this cannot become a dumping ground for
+/// arbitrary client-supplied names.
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// Someone who asked to hear about new pieces.
+///
+/// A table rather than a form posting into nothing. A newsletter field that
+/// silently discards what it is given is worse than no field: the visitor
+/// believes they subscribed, and the shop believes it has a list.
+///
+/// Deliberately minimal — an address and where it came from. Nothing here is
+/// needed to run the shop, so there is nothing to lose if it is never used.
+model Subscriber {
+  id        String   @id @default(cuid())
+  /// Stored lower-cased and unique, so a repeat sign-up updates rather than
+  /// collecting the same person three times.
+  email     String   @unique
+  /// Which surface captured it — the pop-up, the footer, a future landing page.
+  /// Without this, a list gives no way to tell what is actually working.
+  source    String   @default("popup")
+  createdAt DateTime @default(now())
+}
+
+/// A person the catalog is shot on.
+///
+/// Deliberately a small registry rather than a free-text field on each
+/// product: the point of having three to five of them is that the same people
+/// recur across the catalog, which is what makes it read as one brand. A typed
+/// name per product would drift into "Kofi", "kofi" and "Kofi B." within a week.
+///
+/// The images themselves are produced outside this application and uploaded.
+/// Nothing here generates anything.
+model Model {
+  id          String  @id @default(cuid())
+  name        String
+  /// Free text rather than an enum — "Women", "Men", "Unisex" and anything
+  /// else you decide to shoot are all equally valid, and an enum would need a
+  /// migration every time that list changed.
+  gender      String
+  /// Shown beside a model shot so a shopper can judge fit. Both optional: a
+  /// shot is still useful without them, just less informative.
+  heightCm    Int?
+  wearingSize String?
+  /// A portrait of the model alone, used in the admin picker so staff choose a
+  /// face rather than a name from a dropdown.
+  referenceImageUrl String?
+  displayOrder Int     @default(0)
+  /// Retired rather than deleted: a model that has been shot in products stays
+  /// referenced by those shots, and deleting the row would take the imagery
+  /// with it.
+  isActive    Boolean  @default(true)
+  shots       ProductModelShot[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// One uploaded image of a given model wearing a given product.
+model ProductModelShot {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  modelId   String
+  /// Restrict, not Cascade: deleting a model must not silently erase every
+  /// photograph they appear in across the catalog.
+  model     Model   @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  imageUrl  String
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
+
+  /// One shot per model per product. A second angle on the same model belongs
+  /// in the product's gallery images, not as a duplicate pairing that would
+  /// make "which model is this product shown on" ambiguous.
+  @@unique([productId, modelId])
+  @@index([productId])
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size       String      // e.g. S, M, L, XL
+  color      String
+  // The swatch shown on the product grid, as #rrggbb. Nullable because every
+  // variant that existed before this column keeps working: the storefront
+  // falls back to matching the colour NAME against a lookup table, which is a
+  // guess. Setting this replaces the guess with the actual garment colour.
+  colorHex   String?
+  sku        String      @unique
+  quantity   Int         @default(0)
+  inStock    Boolean     @default(true)
+  orderItems OrderItem[]
+
+  @@unique([productId, size, color])
+}
+
+model Order {
+  id                String             @id @default(cuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id])
+  addressId         String
+  address           Address            @relation(fields: [addressId], references: [id])
+  items             OrderItem[]
+  status            OrderStatus        @default(PENDING)
+  paymentProvider   PaymentProvider
+  paymentRef        String?            // provider's transaction reference, never raw card data
+  totalAmount       Int                // minor units
+  currency          String             @default("GHS")
+  paymentExpiresAt   DateTime?
+  carrier           String?            // e.g. DHL, Speedaf, local courier name
+  trackingNumber    String?
+  trackingUrl       String?
+  estimatedDelivery DateTime?
+  statusHistory     OrderStatusEvent[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([paymentRef])
+}
+
+// One row per status change, so a customer's tracking page can show a full
+// timeline (Placed -> Paid -> Shipped -> Delivered) rather than just the
+// current state.
+model OrderStatusEvent {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId       String
+  variant         ProductVariant @relation(fields: [variantId], references: [id])
+  quantity        Int
+  priceAtPurchase Int            // minor units, snapshot at time of purchase
+}

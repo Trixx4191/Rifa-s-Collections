@@ -1,0 +1,50 @@
+{
+  "name": "rifas-collections",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "prisma generate",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "postinstall": "prisma generate",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy && prisma generate",
+    "prisma:studio": "prisma studio",
+    "seed": "tsx prisma/seed.ts",
+    "create-admin": "tsx prisma/createAdmin.ts",
+    "db:check": "tsx prisma/checkDb.ts",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
+    "test:watch": "node --import tsx --test --watch \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.632.0",
+    "@aws-sdk/s3-request-presigner": "^3.632.0",
+    "@prisma/client": "^5.18.0",
+    "bcryptjs": "^2.4.3",
+    "next": "^15.5.25",
+    "next-auth": "^4.24.7",
+    "nodemailer": "^7.0.13",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "stripe": "^16.8.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.14.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.40",
+    "prisma": "^5.18.0",
+    "tailwindcss": "^3.4.7",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
