@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Parchment } from "@/components/Decor";
 
 /**
  * The sign-up panel that slides up from the bottom of the storefront.
@@ -136,33 +137,35 @@ export default function NewsletterPopup() {
 
   return (
     <div
-      className="popup paper fixed inset-x-0 bottom-0 z-40 border-t border-black/10"
+      className="popup fixed inset-x-3 bottom-3 z-40 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[25rem]"
+      style={{ ["--parchment-w" as string]: "min(25rem, calc(100vw - 1.5rem))" }}
       data-state={open ? "open" : "closed"}
       // Complementary, not a dialog: it is not modal and does not take focus.
       role="complementary"
       aria-label="Newsletter sign-up"
     >
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label="Dismiss"
-        className="absolute right-[var(--gutter)] top-5 -mr-2 p-2 transition-opacity hover:opacity-40"
-      >
-        <svg width="12" height="12" viewBox="0 0 14 14" aria-hidden>
-          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.2" fill="none" />
-        </svg>
-      </button>
+      {/* Written on parchment, like every pop-up the site sends. */}
+      <Parchment>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Dismiss"
+          className="absolute right-[12%] top-[17%] p-2 transition-opacity hover:opacity-50"
+        >
+          <svg width="11" height="11" viewBox="0 0 14 14" aria-hidden>
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.3" fill="none" />
+          </svg>
+        </button>
 
-      <div className="mx-auto max-w-sm px-[var(--gutter)] py-7">
         {status === "done" ? (
-          <p className="type-label py-6 text-center" role="status">
+          <p className="py-6 text-center font-serif text-2xl italic" role="status">
             You are on the list.
           </p>
         ) : (
           <form onSubmit={submit}>
-            <p className="font-serif text-2xl italic leading-tight">Be the first to know</p>
-            <p className="type-micro mt-1 text-[var(--muted)]">New pieces, restocks and fragrance drops</p>
-            <label className="mt-3 block">
+            <p className="pr-8 font-serif text-2xl italic leading-tight">Be the first to know</p>
+            <p className="type-micro mt-1">New pieces, restocks and fragrance drops</p>
+            <label className="mt-2 block">
               <span className="sr-only">Email address</span>
               <input
                 type="email"
@@ -185,7 +188,7 @@ export default function NewsletterPopup() {
             )}
           </form>
         )}
-      </div>
+      </Parchment>
     </div>
   );
 }

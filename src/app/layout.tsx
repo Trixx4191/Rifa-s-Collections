@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Jost } from "next/font/google";
 import Navbar, { FALLBACK_CATEGORIES, type NavCategory } from "@/components/Navbar";
 import { prisma } from "@/lib/prisma";
 import Footer from "@/components/Footer";
+import { SideVines } from "@/components/Decor";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import Providers from "@/components/Providers";
 import "./globals.css";
@@ -76,7 +77,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
           <Navbar categories={categories} />
 
-          <main id="main" className="relative mx-auto w-full max-w-container px-[var(--gutter)] pb-32">
+          <SideVines />
+
+          {/* On wide screens the page keeps a margin each side for the vines. */}
+          <main id="main" className="relative mx-auto w-full max-w-container px-[var(--gutter)] pb-32 xl:px-[7rem]">
             <div className="page-enter">{children}</div>
           </main>
 

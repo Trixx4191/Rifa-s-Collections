@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/types/product";
 import { Kicker } from "@/components/luxury";
+import Image from "next/image";
+import { BRAND_IMAGES } from "@/components/BrandImages";
 
 const PROVIDERS = [
   { value: "PAYSTACK", label: "Card / MTN MoMo / Telecel Cash", note: "Paystack" },
@@ -31,6 +33,9 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center py-40 text-center">
+        <div aria-hidden className="relative mb-8 h-16 w-24">
+          <Image src={BRAND_IMAGES.bee} alt="" fill sizes="96px" className="object-contain" />
+        </div>
         <h1>Checkout</h1>
         <p className="type-label mt-3 text-[var(--muted)]">Your bag is empty.</p>
       </div>
@@ -78,20 +83,35 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl pt-10">
-      <h1 className="text-center">Checkout</h1>
+    <div className="mx-auto max-w-4xl pt-8">
+      {/* The payment page opens on the green-and-gold pattern, closed with the
+          rose wax seal, which sits on the band's lower edge. */}
+      <section className="checkout-band relative px-6 pb-16 pt-10 text-center sm:pb-20 sm:pt-12">
+        <h1 className="type-d2 italic text-[var(--band-gold)]">Checkout</h1>
 
-      <nav aria-label="Checkout progress" className="mt-4 flex items-center justify-center gap-4">
-        <span className={`type-micro ${step === "shipping" ? "text-black" : "text-[var(--muted)]"}`}>
-          01 Shipping
-        </span>
-        <span className="h-px w-6 bg-black/15" aria-hidden />
-        <span className={`type-micro ${step === "payment" ? "text-black" : "text-[var(--muted)]"}`}>
-          02 Payment
-        </span>
-      </nav>
+        <nav aria-label="Checkout progress" className="mt-4 flex items-center justify-center gap-4">
+          <span
+            className={`type-micro ${step === "shipping" ? "text-[var(--band-gold)]" : "text-[var(--band-gold)]/55"}`}
+          >
+            01 Shipping
+          </span>
+          <span className="h-px w-6 bg-[var(--band-gold)]/40" aria-hidden />
+          <span
+            className={`type-micro ${step === "payment" ? "text-[var(--band-gold)]" : "text-[var(--band-gold)]/55"}`}
+          >
+            02 Payment
+          </span>
+        </nav>
 
-      <div className="mt-14 grid gap-14 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-20">
+        <span
+          aria-hidden
+          className="absolute bottom-0 left-1/2 block h-20 w-20 -translate-x-1/2 translate-y-1/2 sm:h-24 sm:w-24"
+        >
+          <Image src={BRAND_IMAGES.waxSeal} alt="" fill sizes="96px" className="object-contain drop-shadow-md" />
+        </span>
+      </section>
+
+      <div className="mt-20 grid gap-14 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-20">
         <div>
           {step === "shipping" ? (
             <form onSubmit={continueToPayment}>

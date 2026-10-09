@@ -1,6 +1,8 @@
 import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { BRAND_IMAGES } from "@/components/BrandImages";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/types/product";
@@ -64,7 +66,13 @@ export default async function OrderDetailPage({
       )}
 
       <header className="pt-10 text-center">
-        <h1>{isPaid ? "Order confirmed" : hasFailed ? "Order incomplete" : "Order placed"}</h1>
+        {/* A glitter magnolia once payment is confirmed. */}
+        {isPaid && (
+          <span aria-hidden className="relative mx-auto mb-6 block aspect-[457/480] w-32 sm:w-40">
+            <Image src={BRAND_IMAGES.magnolia} alt="" fill sizes="160px" className="object-contain" priority />
+          </span>
+        )}
+        <h1 className={isPaid ? "type-d2 italic" : undefined}>{isPaid ? "Order confirmed" : hasFailed ? "Order incomplete" : "Order placed"}</h1>
         <p className="type-micro mt-2 text-[var(--muted)]">{order.id}</p>
       </header>
 

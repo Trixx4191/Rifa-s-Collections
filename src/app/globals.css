@@ -610,6 +610,105 @@ p {
 }
 
 /* ============================================================================
+   DECOR — the brand's own pieces placed around the site
+   ============================================================================ */
+
+/* The flower vine threaded down both sides of the page, in a margin the page
+   keeps clear for it (see `main` in layout.tsx). Wide screens only. The vine
+   repeats down the full height; the join falls behind a leaf. */
+.side-vine {
+  display: none;
+  position: fixed;
+  top: var(--header-h);
+  bottom: 0;
+  z-index: 1;
+  width: 5rem;
+  pointer-events: none;
+  background-image: url("/images/brand/vine-vertical.webp");
+  background-repeat: repeat-y;
+  background-position: center top;
+  background-size: 100% auto;
+  opacity: 0.92;
+}
+
+.side-vine--left {
+  left: 1rem;
+}
+
+.side-vine--right {
+  right: 1rem;
+  transform: scaleX(-1);
+}
+
+@media (min-width: 1280px) {
+  .side-vine {
+    display: block;
+  }
+}
+
+/* The payment page's band: the green-and-gold pattern, with a gentle inner
+   shade so the pale-gold heading reads clearly on it. */
+.checkout-band {
+  --band-gold: #f1dfae;
+  background-color: #33503c;
+  background-image:
+    linear-gradient(180deg, rgba(20, 35, 25, 0.25), rgba(20, 35, 25, 0.1)),
+    url("/images/brand/pattern-green.webp");
+  background-size: cover, cover;
+  background-position: center, center;
+  border-radius: 2px;
+}
+
+/* The parchment card for pop-ups. The image is stretched to the card, and the
+   padding (percentages of the card's width) keeps content inside the paper,
+   clear of the torn edges and the gold stars. */
+.parchment {
+  position: relative;
+  min-height: calc(var(--parchment-w, 100%) * 0.676);
+  /* Top: below the two gold stars at the top left. Bottom and right: clear of
+     the star at the bottom right. */
+  padding: 25% 17% 18% 11%;
+  background-image: url("/images/brand/parchment.webp");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  color: #4a3426;
+  filter: drop-shadow(0 14px 28px rgba(75, 40, 54, 0.22));
+}
+
+.parchment .type-micro,
+.parchment .field-label {
+  color: #7a6150;
+}
+
+.parchment .input-soft {
+  border-color: rgba(74, 52, 38, 0.3);
+  color: #4a3426;
+}
+
+.parchment .input-soft::placeholder {
+  color: #8a7260;
+}
+
+/* The sun or moon beside the logo arrives softly. */
+.sky-mark {
+  animation: pageEnter 0.8s var(--ease-out) backwards;
+}
+
+/* The gold birds drift, very slightly, as if in flight. */
+@keyframes birdsDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-6px, -8px, 0);
+  }
+}
+
+.birds-drift {
+  animation: birdsDrift 6s ease-in-out infinite alternate;
+}
+
+/* ============================================================================
    PRODUCT FRAMING — "the zoom"
 
    A garment sits small and centred in a large blank cell; the air around it is
@@ -783,6 +882,10 @@ video.zoom-stage {
 
   .popup[data-state="closed"] {
     transform: none;
+  }
+
+  .birds-drift {
+    animation: none;
   }
 
   .nav-shine .nav-shine-text {

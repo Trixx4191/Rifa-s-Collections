@@ -23,7 +23,7 @@ export default function Footer() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <footer className="linen-band">
+    <footer className="linen-band relative z-[2]">
       <div className="mx-auto flex max-w-container flex-col items-center justify-between gap-5 px-[var(--gutter)] py-10 sm:flex-row sm:py-12">
         <nav aria-label="Help">
           <ul className="flex flex-wrap justify-center gap-x-7 gap-y-2">

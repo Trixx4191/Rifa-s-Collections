@@ -67,13 +67,23 @@ replace the file or change its path there.
 | --- | --- |
 | `paper-rose.webp` | The page itself — a seamless 512px tile of pale rose paper |
 | `linen-rose.webp` | The footer — a seamless 512px tile of rose linen |
-| `linen-bow.webp` | Homepage hero until one is set in /admin/homepage; About page, in an arch |
-| `rug-ivory.webp` | Beside sign-in and sign-up, on wide screens |
-| `khatam-box.webp` | The empty bag and the "not found" page |
-| `rug-diamond.webp` | An empty category |
+| `linen-bow.webp` | Homepage hero until one is set in /admin/homepage |
+| `lily.webp` | Leaning in beside the homepage image |
+| `gold-birds.webp` | Flying across the top of the homepage (drifting gently) |
+| `bee.webp` | Beside the logo; the empty bag, empty category, empty checkout and "not found" |
+| `sun.webp` / `moon-crescent.webp` | Beside the logo — the sun 6:00–17:59 in the visitor's own time, the crescent otherwise |
+| `vine-vertical.webp` | Threaded down both sides of every page, on screens 1280px and wider |
+| `doves.webp` | About page |
+| `pattern-burgundy.webp` | In the arch beside sign-in and sign-up |
+| `pattern-green.webp` + `wax-seal.webp` | The checkout band, with the seal on its lower edge |
+| `parchment.webp` | The card every pop-up is written on (see `Parchment` in `src/components/Decor.tsx`) |
+| `magnolia.webp` | The order page once payment is confirmed |
+| `cream-swatch.webp` | Under the price on fragrance product pages |
+| `damask.webp` | Above the product name on every product page |
 
-Not currently placed, kept for use: `rug-wave`, `rug-blue-edge`, `rug-medallion`,
-`rug-teal`, `rug-corner`.
+Not currently placed, kept for use: `moon-full`, `vine-trailing`, `rug-beige`,
+`rug-ivory`, `khatam-box`, `rug-diamond`, `rug-wave`, `rug-blue-edge`,
+`rug-medallion`, `rug-teal`, `rug-corner`.
 
 `rug-wave`, `rug-blue-edge`, `rug-corner` and `khatam-box` have transparent
 backgrounds so they sit straight on the paper; keep that if you replace them.

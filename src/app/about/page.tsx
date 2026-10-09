@@ -3,19 +3,15 @@ import InfoPage, { InfoSection } from "@/components/InfoPage";
 import Image from "next/image";
 import { SITE } from "@/content/site";
 import { BRAND_IMAGES } from "@/components/BrandImages";
-import { ArchOutline } from "@/components/Ornaments";
 
 export const metadata: Metadata = { title: "About" };
 
 export default function AboutPage() {
   return (
     <InfoPage kicker="Rifa's Collections" title="About." intro={SITE.tagline}>
-      {/* The brand linen, in an arch. */}
-      <div aria-hidden className="relative mx-auto aspect-[5/7] w-[min(70%,16rem)]">
-        <div className="arch-frame absolute inset-0">
-          <Image src={BRAND_IMAGES.aboutImage} alt="" fill sizes="16rem" className="object-cover" />
-        </div>
-        <ArchOutline />
+      {/* Three white doves in flight. */}
+      <div aria-hidden className="relative mx-auto aspect-[352/480] w-[min(60%,14rem)]">
+        <Image src={BRAND_IMAGES.doves} alt="" fill sizes="14rem" className="object-contain" />
       </div>
 
       <InfoSection title="What we make">

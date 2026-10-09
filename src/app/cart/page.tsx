@@ -22,8 +22,8 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center pb-40 pt-20 text-center">
-        <div aria-hidden className="relative mb-10 h-40 w-40">
-          <Image src={BRAND_IMAGES.khatamBox} alt="" fill sizes="160px" className="object-contain" />
+        <div aria-hidden className="relative mb-10 h-20 w-28">
+          <Image src={BRAND_IMAGES.bee} alt="" fill sizes="112px" className="object-contain" />
         </div>
         <h1>Bag</h1>
         <p className="type-label mt-3 text-[var(--muted)]">Empty.</p>

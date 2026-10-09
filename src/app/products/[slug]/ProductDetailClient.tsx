@@ -7,8 +7,9 @@ import { useCart } from "@/context/CartContext";
 import { SITE } from "@/content/site";
 import { isLowStock } from "@/lib/inventory";
 import { formatDropDate, type ReleaseState } from "@/lib/release";
+import Image from "next/image";
 import { ImageGallery } from "@/components/luxury";
-import { StarRule } from "@/components/Ornaments";
+import { BRAND_IMAGES } from "@/components/BrandImages";
 
 /**
  * The product page, reduced to: the image, the name, the price, a size, and a
@@ -94,9 +95,19 @@ export default function ProductDetailClient({ product, access }: { product: Prod
       <ImageGallery media={media} priority />
 
       <div className="mx-auto mt-10 flex max-w-sm flex-col items-center text-center">
-        <StarRule className="mb-6" />
+        {/* The damask emblem above the name. */}
+        <span aria-hidden className="relative mb-5 block h-12 w-11">
+          <Image src={BRAND_IMAGES.damask} alt="" fill sizes="44px" className="object-contain" />
+        </span>
         <h1 className="type-d2 italic">{product.name}</h1>
         <p className="type-label mt-3 text-[var(--accent-deep)]">{formatPrice(product.price, product.currency)}</p>
+
+        {/* Fragrances carry a cream swatch with a red flower beneath the price. */}
+        {product.category.slug === "fragrances" && (
+          <span aria-hidden className="relative mt-5 block aspect-[560/255] w-48">
+            <Image src={BRAND_IMAGES.creamSwatch} alt="" fill sizes="192px" className="object-contain" />
+          </span>
+        )}
 
         {/* A choice with one option is not a choice. "One size" products and
             single-colour products skip the row entirely. */}

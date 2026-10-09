@@ -51,8 +51,8 @@ export default function ProductsBrowser({
 
       {products.length === 0 ? (
         <div className="flex flex-col items-center pb-40 pt-24">
-          <div aria-hidden className="relative h-32 w-20">
-            <Image src={BRAND_IMAGES.diamondRug} alt="" fill sizes="80px" className="object-contain" />
+          <div aria-hidden className="relative h-16 w-24">
+            <Image src={BRAND_IMAGES.bee} alt="" fill sizes="96px" className="object-contain" />
           </div>
           <p className="mt-8 text-center font-serif text-xl italic text-[var(--muted)]">Nothing here yet.</p>
         </div>

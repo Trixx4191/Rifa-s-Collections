@@ -6,7 +6,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import { isAdminRole } from "@/lib/roles";
+import Image from "next/image";
 import { Star8 } from "@/components/Ornaments";
+import { SkyMark } from "@/components/Decor";
+import { BRAND_IMAGES } from "@/components/BrandImages";
 
 /**
  * The header: the wordmark, the account and the bag, and beneath them the
@@ -62,14 +65,18 @@ export default function Navbar({ categories = FALLBACK_CATEGORIES }: { categorie
           <span className="nav-shine-text type-label hidden sm:inline">{accountLabel}</span>
         </Link>
 
-        <Link
-          href="/"
-          aria-label="Rifa's Collections, home"
-          className="brand-wordmark nav-shine absolute left-1/2 -translate-x-1/2"
-        >
-          <span className="nav-shine-text">Rifa&rsquo;s</span>
-          <span className="brand-wordmark-sub">Collections</span>
-        </Link>
+        {/* The wordmark between its two marks: the gold bee, and the sun or
+            moon for the visitor's time of day. */}
+        <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2.5 sm:gap-3.5">
+          <span aria-hidden className="relative block h-[18px] w-[25px] sm:h-5 sm:w-7">
+            <Image src={BRAND_IMAGES.bee} alt="" fill sizes="28px" className="object-contain" />
+          </span>
+          <Link href="/" aria-label="Rifa's Collections, home" className="brand-wordmark nav-shine">
+            <span className="nav-shine-text">Rifa&rsquo;s</span>
+            <span className="brand-wordmark-sub">Collections</span>
+          </Link>
+          <SkyMark className="h-5 w-5 sm:h-6 sm:w-6" />
+        </div>
 
         <Link
           href="/cart"
